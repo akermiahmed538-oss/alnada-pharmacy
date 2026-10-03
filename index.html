@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Al Nada Pharmacy – Demo Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f8f3;--card:#fff;--ink:#14261f;--mute:#5b6d65;--brand:#0e6b50;--on:#fff;--tint:#dff0e7;--line:#d8e2db;--rx:#a93a2a;--rxbg:#fbe8e4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a16;--card:#17261f;--ink:#e8f1ec;--mute:#9fb2a9;--brand:#4cc79b;--on:#07241a;--tint:#1e3a2e;--line:#2a4136;--rx:#ff8a78;--rxbg:#3a1f1a}}
+:root[data-theme="dark"]{--bg:#0f1a16;--card:#17261f;--ink:#e8f1ec;--mute:#9fb2a9;--brand:#4cc79b;--on:#07241a;--tint:#1e3a2e;--line:#2a4136;--rx:#ff8a78;--rxbg:#3a1f1a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "IBM Plex Sans",system-ui,Arial,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0}
+.logo{font-weight:700;font-size:20px;color:var(--brand)}
+.cartbtn{background:var(--brand);color:var(--on);border:0;border-radius:999px;padding:6px 16px;font-weight:500}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px}
+nav button{background:none;border:0;padding:6px 14px;border-radius:8px;white-space:nowrap;color:var(--mute)}
+nav button[aria-current=true]{background:var(--tint);color:var(--brand);font-weight:700}
+.note{background:var(--rxbg);color:var(--rx);font-size:13px;padding:6px 16px;text-align:center}
+.hero{padding:28px 0 16px}
+.hero h1{font-size:clamp(26px,6vw,40px);line-height:1.2;margin:0 0 6px}
+.hero p{color:var(--mute);margin:0 0 16px}
+.search{display:flex;background:var(--card);border:2px solid var(--brand);border-radius:12px;overflow:hidden}
+.search input{flex:1;border:0;background:none;padding:12px 14px;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 0}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 14px;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding-bottom:32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.pic{background:var(--tint);border-radius:8px;height:84px;display:grid;place-items:center;font-size:40px}
+.card h3{margin:6px 0 0;font-size:16px}
+.ing{color:var(--mute);font-size:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px}
+.price{font-weight:700}
+.tag{background:var(--rxbg);color:var(--rx);font-size:12px;border-radius:6px;padding:0 8px;align-self:flex-start}
+.btn{background:var(--brand);color:var(--on);border:0;border-radius:8px;padding:6px 14px;font-weight:500}
+.btn.alt{background:var(--tint);color:var(--brand)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
+.panel h2{margin:0 0 8px;font-size:20px}
+label{display:block;font-size:14px;color:var(--mute);margin-top:10px}
+input[type=text],input[type=tel],input[type=number],select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px}
+.drop{border:2px dashed var(--brand);border-radius:12px;padding:24px;text-align:center;background:var(--tint)}
+.ord{border-top:1px solid var(--line);padding:10px 0}
+.ord:first-of-type{border-top:0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10;display:none}
+.ov.on{display:block}
+.sheet{position:absolute;bottom:0;inset-inline:0;max-width:560px;margin:0 auto;background:var(--card);border-radius:16px 16px 0 0;max-height:88%;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.line{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.qty button{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline:16px;margin:auto;max-width:360px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:20;text-align:center;display:none}
+.stats{display:flex;gap:12px;flex-wrap:wrap}
+.stats div{flex:1;min-width:120px;background:var(--tint);border-radius:10px;padding:10px}
+.stats b{display:block;font-size:22px;color:var(--brand)}
+.empty{color:var(--mute);text-align:center;padding:24px 0}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="bar"><span class="logo">⚕ Al Nada Pharmacy</span><button class="cartbtn" id="cartBtn">Cart (<span id="cnt">0</span>)</button></div>
+  <nav id="nav"></nav>
+</div></header>
+<main class="wrap" id="app"></main>
+<div class="ov" id="ov"><div class="sheet" id="sheet" role="dialog" aria-label="Cart"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const CUR='SAR';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(+n).toFixed(2)+' '+CUR;
+const mem={};
+const db={get(k,d){try{const v=localStorage.getItem(k);if(v)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d},set(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const CATS=['All','Pain relief','Vitamins','Skin care','Mother & baby','Devices & first aid','Prescription'];
+const BASE=[
+{id:1,n:'Panadol Extra',ing:'Paracetamol + caffeine',cat:'Pain relief',p:12,e:'💊'},
+{id:2,n:'Brufen 400',ing:'Ibuprofen',cat:'Pain relief',p:18,e:'💊'},
+{id:3,n:'Vitamin D3 1000',ing:'Cholecalciferol',cat:'Vitamins',p:35,e:'🟡'},
+{id:4,n:'Omega 3',ing:'Fish oil',cat:'Vitamins',p:55,e:'🐟'},
+{id:5,n:'Daily Moisturizer',ing:'Glycerin + vitamin E',cat:'Skin care',p:28,e:'🧴'},
+{id:6,n:'Sunscreen SPF50',ing:'Mineral filters',cat:'Skin care',p:45,e:'☀️'},
+{id:7,n:'Infant Vitamin Drops',ing:'Vitamin D + A',cat:'Mother & baby',p:22,e:'🍼'},
+{id:8,n:'Digital Thermometer',ing:'Reads in 10 seconds',cat:'Devices & first aid',p:25,e:'🌡️'},
+{id:9,n:'Adhesive Bandages (20)',ing:'Waterproof',cat:'Devices & first aid',p:8,e:'🩹'},
+{id:10,n:'Blood Pressure Monitor',ing:'Upper arm, 90 readings memory',cat:'Devices & first aid',p:120,e:'🩺'},
+{id:11,n:'Amoxicillin 500',ing:'Amoxicillin',cat:'Prescription',p:24,e:'💊',rx:1},
+{id:12,n:'Atorvastatin 20',ing:'Atorvastatin',cat:'Prescription',p:38,e:'💊',rx:1},
+{id:13,n:'Metformin 500',ing:'Metformin',cat:'Prescription',p:15,e:'💊',rx:1}];
+const S={view:'shop',cat:'All',q:'',cart:{},rxFile:'',products:BASE.concat(db.get('phe_extra',[])),orders:db.get('phe_orders',[])};
+const VIEWS=[['shop','Shop'],['rx','Upload prescription'],['orders','My orders'],['admin','Dashboard']];
+const prod=id=>S.products.find(p=>p.id==id);
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2400)}
+function nav(){$('#nav').innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}" ${S.view==k?'aria-current="true"':''}>${l}</button>`).join('');
+ $('#cnt').textContent=Object.values(S.cart).reduce((a,b)=>a+b,0)}
+function grid(){
+ const q=S.q.trim().toLowerCase();
+ const list=S.products.filter(p=>(S.cat=='All'||p.cat==S.cat)&&(!q||(p.n+' '+p.ing).toLowerCase().includes(q)));
+ $('#grid').innerHTML=list.length?list.map(p=>`<article class="card"><div class="pic" aria-hidden="true">${esc(p.e||'💊')}</div><h3>${esc(p.n)}</h3><span class="ing">${esc(p.ing)}</span>${p.rx?'<span class="tag">Prescription required</span>':''}<div class="row"><span class="price">${fmt(p.p)}</span><button class="btn" data-add="${p.id}">Add</button></div></article>`).join(''):'<p class="empty">No results. Try the active ingredient or another category.</p>'}
+function shop(){
+ $('#app').innerHTML=`<section class="hero"><h1>Your medicine and care, all in one place</h1><p>Search by brand name or active ingredient, and order without the wait.</p>
+ <div class="search"><input id="q" type="search" placeholder="Example: paracetamol" value="${esc(S.q)}" aria-label="Search"></div>
+ <div class="chips">${CATS.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${S.cat==c}">${c}</button>`).join('')}</div></section><div class="grid" id="grid"></div>`;
+ grid()}
+function rxView(){
+ $('#app').innerHTML=`<div class="panel"><h2>Upload a prescription</h2><p class="ing">Medicines marked “Prescription required” can only be ordered with an attached prescription. Accepted: image or PDF.</p>
+ <div class="drop"><input type="file" id="rxf" accept="image/*,.pdf" aria-label="Choose prescription file"><p id="rxs">${S.rxFile?'✔ Attached: '+esc(S.rxFile):'No file selected'}</p></div>
+ <p class="ing">In this demo the file isn't uploaded; only its name is saved.</p></div>`}
+function ordList(admin){
+ if(!S.orders.length)return '<p class="empty">No orders yet. Add products to your cart and check out.</p>';
+ return S.orders.slice().reverse().map(o=>`<div class="ord"><b>Order #${o.id}</b> · ${esc(o.date)} · ${fmt(o.total)}${o.rx?' <span class="tag">Rx</span>':''}<br><span class="ing">${esc(o.name)} – ${esc(o.phone)} – ${esc(o.addr)}</span><br><span class="ing">${o.items.map(i=>esc(i.n)+' ×'+i.q).join(', ')}</span><br>
+ ${admin?`<select data-st="${o.id}" aria-label="Order status">${['New','Preparing','Delivered'].map(s=>`<option ${o.status==s?'selected':''}>${s}</option>`).join('')}</select>`:`Status: <b>${esc(o.status)}</b>`}</div>`).join('')}
+function ordersView(){$('#app').innerHTML=`<div class="panel"><h2>My orders</h2>${ordList(false)}</div>`}
+function adminView(){
+ const rev=S.orders.reduce((a,o)=>a+o.total,0);
+ $('#app').innerHTML=`<div class="panel"><h2>Dashboard</h2><div class="stats"><div><b>${S.products.length}</b>Products</div><div><b>${S.orders.length}</b>Orders</div><div><b>${fmt(rev)}</b>Sales</div></div></div>
+ <div class="panel"><h2>Add a product</h2><form id="af"><label>Name<input type="text" name="n" required></label><label>Active ingredient<input type="text" name="ing" required></label>
+ <label>Category<select name="cat">${CATS.slice(1,6).map(c=>`<option>${c}</option>`).join('')}</select></label><label>Price<input type="number" name="p" min="0.5" step="0.5" required></label>
+ <label><input type="checkbox" name="rx"> Prescription required</label><p><button class="btn">Add product</button></p></form></div>
+ <div class="panel"><h2>Manage orders</h2>${ordList(true)}</div>`}
+function render(){nav();({shop,rx:rxView,orders:ordersView,admin:adminView})[S.view]()}
+function cartView(){
+ const ids=Object.keys(S.cart);
+ if(!ids.length){$('#sheet').innerHTML='<h2>Cart</h2><p class="empty">Your cart is empty. Pick products from the shop.</p><button class="btn alt" data-close>Close</button>';return}
+ const total=ids.reduce((a,i)=>a+prod(i).p*S.cart[i],0),needRx=ids.some(i=>prod(i).rx);
+ $('#sheet').innerHTML=`<h2>Cart</h2>${ids.map(i=>{const p=prod(i);return `<div class="line"><span>${esc(p.n)}<br><span class="ing">${fmt(p.p)}${p.rx?' · Rx':''}</span></span><span class="qty"><button data-dec="${i}" aria-label="Decrease">−</button> ${S.cart[i]} <button data-add="${i}" aria-label="Increase">+</button></span></div>`}).join('')}
+ <p><b>Total: ${fmt(total)}</b></p>
+ ${needRx?`<p class="tag" style="display:block">${S.rxFile?'✔ Prescription attached: '+esc(S.rxFile):'Your cart has a prescription medicine. Upload the prescription in the “Upload prescription” tab before confirming.'}</p>`:''}
+ <form id="cf"><label>Name<input type="text" name="name" required autocomplete="name"></label><label>Phone number<input type="tel" name="phone" required autocomplete="tel"></label><label>Delivery address<input type="text" name="addr" required></label>
+ <p><button class="btn">Confirm order</button> <button type="button" class="btn alt" data-close>Keep shopping</button></p></form>`}
+const open=()=>{cartView();$('#ov').classList.add('on')},close=()=>$('#ov').classList.remove('on');
+function add(id){S.cart[id]=(S.cart[id]||0)+1;nav();if($('#ov').classList.contains('on'))cartView();else toast('Added “'+prod(id).n+'” to your cart')}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.v){S.view=t.dataset.v;render()}
+ else if(t.dataset.cat){S.cat=t.dataset.cat;shop()}
+ else if(t.dataset.add)add(t.dataset.add);
+ else if(t.dataset.dec){const i=t.dataset.dec;if(--S.cart[i]<=0)delete S.cart[i];nav();cartView()}
+ else if(t.id=='cartBtn')open();
+ else if('close' in t.dataset)close()});
+$('#ov').addEventListener('click',e=>{if(e.target.id=='ov')close()});
+document.addEventListener('input',e=>{if(e.target.id=='q'){S.q=e.target.value;grid()}});
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.id=='rxf'&&t.files[0]){S.rxFile=t.files[0].name;$('#rxs').textContent='✔ Attached: '+S.rxFile;toast('Prescription attached')}
+ if(t.dataset.st){const o=S.orders.find(o=>o.id==t.dataset.st);o.status=t.value;db.set('phe_orders',S.orders);toast('Order status updated')}});
+document.addEventListener('submit',e=>{
+ e.preventDefault();const f=e.target,d=Object.fromEntries(new FormData(f));
+ if(f.id=='af'){const extra=db.get('phe_extra',[]);const p={id:Date.now(),n:d.n,ing:d.ing,cat:d.cat,p:+d.p,e:d.rx?'💊':'📦',rx:d.rx?1:0};if(d.rx)p.cat='Prescription';extra.push(p);db.set('phe_extra',extra);S.products.push(p);adminView();toast('Product added to the shop')}
+ if(f.id=='cf'){
+  const ids=Object.keys(S.cart),needRx=ids.some(i=>prod(i).rx);
+  if(needRx&&!S.rxFile){toast('Attach the prescription first');return}
+  const o={id:S.orders.length+1001,date:new Date().toLocaleDateString('en-GB'),name:d.name,phone:d.phone,addr:d.addr,rx:needRx,status:'New',total:ids.reduce((a,i)=>a+prod(i).p*S.cart[i],0),items:ids.map(i=>({n:prod(i).n,q:S.cart[i]}))};
+  S.orders.push(o);db.set('phe_orders',S.orders);S.cart={};close();S.view='orders';render();toast('Order #'+o.id+' received')}});
+render();
+</script>
+</body>
+</html>
