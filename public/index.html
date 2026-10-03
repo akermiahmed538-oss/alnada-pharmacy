@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Al Nada Pharmacy – Demo Store</title>
+<title>Al Nada Pharmacy – Pharmacy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -75,89 +75,90 @@ const CUR='SAR';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>(+n).toFixed(2)+' '+CUR;
-const mem={};
-const db={get(k,d){try{const v=localStorage.getItem(k);if(v)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d},set(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const CATS=['All','Pain relief','Vitamins','Skin care','Mother & baby','Devices & first aid','Prescription'];
-const BASE=[
-{id:1,n:'Panadol Extra',ing:'Paracetamol + caffeine',cat:'Pain relief',p:12,e:'💊'},
-{id:2,n:'Brufen 400',ing:'Ibuprofen',cat:'Pain relief',p:18,e:'💊'},
-{id:3,n:'Vitamin D3 1000',ing:'Cholecalciferol',cat:'Vitamins',p:35,e:'🟡'},
-{id:4,n:'Omega 3',ing:'Fish oil',cat:'Vitamins',p:55,e:'🐟'},
-{id:5,n:'Daily Moisturizer',ing:'Glycerin + vitamin E',cat:'Skin care',p:28,e:'🧴'},
-{id:6,n:'Sunscreen SPF50',ing:'Mineral filters',cat:'Skin care',p:45,e:'☀️'},
-{id:7,n:'Infant Vitamin Drops',ing:'Vitamin D + A',cat:'Mother & baby',p:22,e:'🍼'},
-{id:8,n:'Digital Thermometer',ing:'Reads in 10 seconds',cat:'Devices & first aid',p:25,e:'🌡️'},
-{id:9,n:'Adhesive Bandages (20)',ing:'Waterproof',cat:'Devices & first aid',p:8,e:'🩹'},
-{id:10,n:'Blood Pressure Monitor',ing:'Upper arm, 90 readings memory',cat:'Devices & first aid',p:120,e:'🩺'},
-{id:11,n:'Amoxicillin 500',ing:'Amoxicillin',cat:'Prescription',p:24,e:'💊',rx:1},
-{id:12,n:'Atorvastatin 20',ing:'Atorvastatin',cat:'Prescription',p:38,e:'💊',rx:1},
-{id:13,n:'Metformin 500',ing:'Metformin',cat:'Prescription',p:15,e:'💊',rx:1}];
-const S={view:'shop',cat:'All',q:'',cart:{},rxFile:'',products:BASE.concat(db.get('phe_extra',[])),orders:db.get('phe_orders',[])};
 const VIEWS=[['shop','Shop'],['rx','Upload prescription'],['orders','My orders'],['admin','Dashboard']];
+const S={view:'shop',cat:'All',q:'',cart:{},rxFile:'',rxName:'',products:[],orders:[],pw:''};
 const prod=id=>S.products.find(p=>p.id==id);
-function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2400)}
+async function api(url,o={}){
+ const h={...(o.headers||{})};if(S.pw)h['x-admin-password']=S.pw;
+ let body=o.body;if(o.json){h['Content-Type']='application/json';body=JSON.stringify(o.json)}
+ const r=await fetch(url,{method:o.method,body,headers:h});
+ if(o.blob&&r.ok)return r.blob();
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.error||'Request failed');return d}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2800)}
 function nav(){$('#nav').innerHTML=VIEWS.map(([k,l])=>`<button data-v="${k}" ${S.view==k?'aria-current="true"':''}>${l}</button>`).join('');
  $('#cnt').textContent=Object.values(S.cart).reduce((a,b)=>a+b,0)}
 function grid(){
  const q=S.q.trim().toLowerCase();
- const list=S.products.filter(p=>(S.cat=='All'||p.cat==S.cat)&&(!q||(p.n+' '+p.ing).toLowerCase().includes(q)));
- $('#grid').innerHTML=list.length?list.map(p=>`<article class="card"><div class="pic" aria-hidden="true">${esc(p.e||'💊')}</div><h3>${esc(p.n)}</h3><span class="ing">${esc(p.ing)}</span>${p.rx?'<span class="tag">Prescription required</span>':''}<div class="row"><span class="price">${fmt(p.p)}</span><button class="btn" data-add="${p.id}">Add</button></div></article>`).join(''):'<p class="empty">No results. Try the active ingredient or another category.</p>'}
+ const list=S.products.filter(p=>(S.cat=='All'||p.category==S.cat)&&(!q||(p.name+' '+p.ingredient).toLowerCase().includes(q)));
+ $('#grid').innerHTML=list.length?list.map(p=>`<article class="card"><div class="pic" aria-hidden="true">${esc(p.emoji||'💊')}</div><h3>${esc(p.name)}</h3><span class="ing">${esc(p.ingredient||'')}</span>${p.rx?'<span class="tag">Prescription required</span>':''}<div class="row"><span class="price">${fmt(p.price)}</span><button class="btn" data-add="${p.id}">Add</button></div></article>`).join(''):'<p class="empty">No results. Try the active ingredient or another category.</p>'}
 function shop(){
  $('#app').innerHTML=`<section class="hero"><h1>Your medicine and care, all in one place</h1><p>Search by brand name or active ingredient, and order without the wait.</p>
  <div class="search"><input id="q" type="search" placeholder="Example: paracetamol" value="${esc(S.q)}" aria-label="Search"></div>
  <div class="chips">${CATS.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${S.cat==c}">${c}</button>`).join('')}</div></section><div class="grid" id="grid"></div>`;
  grid()}
 function rxView(){
- $('#app').innerHTML=`<div class="panel"><h2>Upload a prescription</h2><p class="ing">Medicines marked “Prescription required” can only be ordered with an attached prescription. Accepted: image or PDF.</p>
- <div class="drop"><input type="file" id="rxf" accept="image/*,.pdf" aria-label="Choose prescription file"><p id="rxs">${S.rxFile?'✔ Attached: '+esc(S.rxFile):'No file selected'}</p></div>
- <p class="ing">In this demo the file isn't uploaded; only its name is saved.</p></div>`}
+ $('#app').innerHTML=`<div class="panel"><h2>Upload a prescription</h2><p class="ing">Medicines marked “Prescription required” can only be ordered with an attached prescription. Accepted: image or PDF, up to 5 MB.</p>
+ <div class="drop"><input type="file" id="rxf" accept="image/*,.pdf" aria-label="Choose prescription file"><p id="rxs">${S.rxFile?'✔ Attached: '+esc(S.rxName):'No file selected'}</p></div></div>`}
 function ordList(admin){
- if(!S.orders.length)return '<p class="empty">No orders yet. Add products to your cart and check out.</p>';
- return S.orders.slice().reverse().map(o=>`<div class="ord"><b>Order #${o.id}</b> · ${esc(o.date)} · ${fmt(o.total)}${o.rx?' <span class="tag">Rx</span>':''}<br><span class="ing">${esc(o.name)} – ${esc(o.phone)} – ${esc(o.addr)}</span><br><span class="ing">${o.items.map(i=>esc(i.n)+' ×'+i.q).join(', ')}</span><br>
- ${admin?`<select data-st="${o.id}" aria-label="Order status">${['New','Preparing','Delivered'].map(s=>`<option ${o.status==s?'selected':''}>${s}</option>`).join('')}</select>`:`Status: <b>${esc(o.status)}</b>`}</div>`).join('')}
-function ordersView(){$('#app').innerHTML=`<div class="panel"><h2>My orders</h2>${ordList(false)}</div>`}
-function adminView(){
+ if(!S.orders.length)return '<p class="empty">No orders found.</p>';
+ return S.orders.map(o=>`<div class="ord"><b>Order #${o.id}</b> · ${esc(o.created_at.slice(0,10))} · ${fmt(o.total)}${o.rx_file?' <span class="tag">Rx</span>':''}<br><span class="ing">${esc(o.name)} – ${esc(o.phone)} – ${esc(o.address)}</span><br><span class="ing">${o.items.map(i=>esc(i.name)+' ×'+i.qty).join(', ')}</span><br>
+ ${admin?`<select data-st="${o.id}" aria-label="Order status">${['New','Preparing','Delivered'].map(s=>`<option ${o.status==s?'selected':''}>${s}</option>`).join('')}</select>${o.rx_file?` <button class="btn alt" data-rx="${esc(o.rx_file)}">View prescription</button>`:''}`:`Status: <b>${esc(o.status)}</b>`}</div>`).join('')}
+function ordersView(){
+ S.orders=[];
+ $('#app').innerHTML=`<div class="panel"><h2>My orders</h2><form id="of"><label>Phone number used at checkout<input type="tel" name="phone" required autocomplete="tel"></label><p><button class="btn">Show my orders</button></p></form><div id="ol"></div></div>`}
+async function adminView(){
+ if(!S.pw){$('#app').innerHTML=`<div class="panel"><h2>Admin sign in</h2><form id="lf"><label>Password<input type="text" name="pw" required autocomplete="off"></label><p><button class="btn">Sign in</button></p></form></div>`;return}
+ try{S.orders=await api('/api/admin/orders')}catch(e){S.pw='';toast(e.message);return adminView()}
  const rev=S.orders.reduce((a,o)=>a+o.total,0);
  $('#app').innerHTML=`<div class="panel"><h2>Dashboard</h2><div class="stats"><div><b>${S.products.length}</b>Products</div><div><b>${S.orders.length}</b>Orders</div><div><b>${fmt(rev)}</b>Sales</div></div></div>
- <div class="panel"><h2>Add a product</h2><form id="af"><label>Name<input type="text" name="n" required></label><label>Active ingredient<input type="text" name="ing" required></label>
- <label>Category<select name="cat">${CATS.slice(1,6).map(c=>`<option>${c}</option>`).join('')}</select></label><label>Price<input type="number" name="p" min="0.5" step="0.5" required></label>
+ <div class="panel"><h2>Add a product</h2><form id="af"><label>Name<input type="text" name="name" required></label><label>Active ingredient<input type="text" name="ingredient" required></label>
+ <label>Category<select name="category">${CATS.slice(1,6).map(c=>`<option>${c}</option>`).join('')}</select></label><label>Price<input type="number" name="price" min="0.5" step="0.5" required></label>
  <label><input type="checkbox" name="rx"> Prescription required</label><p><button class="btn">Add product</button></p></form></div>
  <div class="panel"><h2>Manage orders</h2>${ordList(true)}</div>`}
 function render(){nav();({shop,rx:rxView,orders:ordersView,admin:adminView})[S.view]()}
 function cartView(){
  const ids=Object.keys(S.cart);
  if(!ids.length){$('#sheet').innerHTML='<h2>Cart</h2><p class="empty">Your cart is empty. Pick products from the shop.</p><button class="btn alt" data-close>Close</button>';return}
- const total=ids.reduce((a,i)=>a+prod(i).p*S.cart[i],0),needRx=ids.some(i=>prod(i).rx);
- $('#sheet').innerHTML=`<h2>Cart</h2>${ids.map(i=>{const p=prod(i);return `<div class="line"><span>${esc(p.n)}<br><span class="ing">${fmt(p.p)}${p.rx?' · Rx':''}</span></span><span class="qty"><button data-dec="${i}" aria-label="Decrease">−</button> ${S.cart[i]} <button data-add="${i}" aria-label="Increase">+</button></span></div>`}).join('')}
+ const total=ids.reduce((a,i)=>a+prod(i).price*S.cart[i],0),needRx=ids.some(i=>prod(i).rx);
+ $('#sheet').innerHTML=`<h2>Cart</h2>${ids.map(i=>{const p=prod(i);return `<div class="line"><span>${esc(p.name)}<br><span class="ing">${fmt(p.price)}${p.rx?' · Rx':''}</span></span><span class="qty"><button data-dec="${i}" aria-label="Decrease">−</button> ${S.cart[i]} <button data-add="${i}" aria-label="Increase">+</button></span></div>`}).join('')}
  <p><b>Total: ${fmt(total)}</b></p>
- ${needRx?`<p class="tag" style="display:block">${S.rxFile?'✔ Prescription attached: '+esc(S.rxFile):'Your cart has a prescription medicine. Upload the prescription in the “Upload prescription” tab before confirming.'}</p>`:''}
- <form id="cf"><label>Name<input type="text" name="name" required autocomplete="name"></label><label>Phone number<input type="tel" name="phone" required autocomplete="tel"></label><label>Delivery address<input type="text" name="addr" required></label>
+ ${needRx?`<p class="tag" style="display:block">${S.rxFile?'✔ Prescription attached: '+esc(S.rxName):'Your cart has a prescription medicine. Upload the prescription in the “Upload prescription” tab before confirming.'}</p>`:''}
+ <form id="cf"><label>Name<input type="text" name="name" required autocomplete="name"></label><label>Phone number<input type="tel" name="phone" required autocomplete="tel"></label><label>Delivery address<input type="text" name="address" required></label>
  <p><button class="btn">Confirm order</button> <button type="button" class="btn alt" data-close>Keep shopping</button></p></form>`}
 const open=()=>{cartView();$('#ov').classList.add('on')},close=()=>$('#ov').classList.remove('on');
-function add(id){S.cart[id]=(S.cart[id]||0)+1;nav();if($('#ov').classList.contains('on'))cartView();else toast('Added “'+prod(id).n+'” to your cart')}
-document.addEventListener('click',e=>{
+function add(id){S.cart[id]=(S.cart[id]||0)+1;nav();if($('#ov').classList.contains('on'))cartView();else toast('Added “'+prod(id).name+'” to your cart')}
+document.addEventListener('click',async e=>{
  const t=e.target.closest('button');if(!t)return;
  if(t.dataset.v){S.view=t.dataset.v;render()}
  else if(t.dataset.cat){S.cat=t.dataset.cat;shop()}
  else if(t.dataset.add)add(t.dataset.add);
  else if(t.dataset.dec){const i=t.dataset.dec;if(--S.cart[i]<=0)delete S.cart[i];nav();cartView()}
+ else if(t.dataset.rx){try{const b=await api('/api/admin/prescriptions/'+t.dataset.rx,{blob:true});window.open(URL.createObjectURL(b))}catch(err){toast('Could not open the file')}}
  else if(t.id=='cartBtn')open();
  else if('close' in t.dataset)close()});
 $('#ov').addEventListener('click',e=>{if(e.target.id=='ov')close()});
 document.addEventListener('input',e=>{if(e.target.id=='q'){S.q=e.target.value;grid()}});
-document.addEventListener('change',e=>{
+document.addEventListener('change',async e=>{
  const t=e.target;
- if(t.id=='rxf'&&t.files[0]){S.rxFile=t.files[0].name;$('#rxs').textContent='✔ Attached: '+S.rxFile;toast('Prescription attached')}
- if(t.dataset.st){const o=S.orders.find(o=>o.id==t.dataset.st);o.status=t.value;db.set('phe_orders',S.orders);toast('Order status updated')}});
-document.addEventListener('submit',e=>{
+ if(t.id=='rxf'&&t.files[0]){
+  const fd=new FormData();fd.append('file',t.files[0]);
+  try{const r=await api('/api/prescriptions',{method:'POST',body:fd});S.rxFile=r.file;S.rxName=r.name;$('#rxs').textContent='✔ Attached: '+r.name;toast('Prescription uploaded')}
+  catch(err){toast(err.message)}}
+ if(t.dataset.st){try{await api('/api/orders/'+t.dataset.st,{method:'PATCH',json:{status:t.value}});toast('Order status updated')}catch(err){toast(err.message)}}});
+document.addEventListener('submit',async e=>{
  e.preventDefault();const f=e.target,d=Object.fromEntries(new FormData(f));
- if(f.id=='af'){const extra=db.get('phe_extra',[]);const p={id:Date.now(),n:d.n,ing:d.ing,cat:d.cat,p:+d.p,e:d.rx?'💊':'📦',rx:d.rx?1:0};if(d.rx)p.cat='Prescription';extra.push(p);db.set('phe_extra',extra);S.products.push(p);adminView();toast('Product added to the shop')}
- if(f.id=='cf'){
-  const ids=Object.keys(S.cart),needRx=ids.some(i=>prod(i).rx);
-  if(needRx&&!S.rxFile){toast('Attach the prescription first');return}
-  const o={id:S.orders.length+1001,date:new Date().toLocaleDateString('en-GB'),name:d.name,phone:d.phone,addr:d.addr,rx:needRx,status:'New',total:ids.reduce((a,i)=>a+prod(i).p*S.cart[i],0),items:ids.map(i=>({n:prod(i).n,q:S.cart[i]}))};
-  S.orders.push(o);db.set('phe_orders',S.orders);S.cart={};close();S.view='orders';render();toast('Order #'+o.id+' received')}});
-render();
+ try{
+  if(f.id=='lf'){S.pw=d.pw;adminView()}
+  if(f.id=='of'){S.orders=await api('/api/orders?phone='+encodeURIComponent(d.phone));$('#ol').innerHTML=ordList(false)}
+  if(f.id=='af'){await api('/api/products',{method:'POST',json:{...d,rx:!!d.rx}});S.products=await api('/api/products');adminView();toast('Product added to the shop')}
+  if(f.id=='cf'){
+   const items=Object.keys(S.cart).map(i=>({id:+i,qty:S.cart[i]}));
+   const r=await api('/api/orders',{method:'POST',json:{...d,items,rx_file:S.rxFile}});
+   S.cart={};close();S.view='orders';render();toast('Order #'+r.id+' received')}
+ }catch(err){toast(err.message)}});
+api('/api/products').then(p=>{S.products=p;render()}).catch(()=>{$('#app').innerHTML='<p class="empty">Could not reach the server. Start it with <b>npm start</b>.</p>';nav()});
 </script>
 </body>
 </html>
